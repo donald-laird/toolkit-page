@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>随机密码生成器 - HOTRUE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', 'Noto Sans SC', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Custom styles for number input arrows */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        .form-control-group {
+            display: flex;
+            align-items: center;
+        }
+        .number-input-container {
+            position: relative;
+            display: inline-block;
+        }
+        .number-input-container input {
+            padding-right: 2rem;
+        }
+        .number-input-arrows {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .number-input-arrows button {
+            height: 50%;
+            width: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9ca3af;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+         .number-input-arrows button:hover {
+            color: #1f2937;
+         }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            background-color: #f9fafb;
+            border-radius: 0.375rem;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 0.5rem;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .copy-feedback {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2d3748;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            pointer-events: none;
+            z-index: 50;
+        }
+        .copy-feedback.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-1rem);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        <div class="w-full max-w-2xl mx-auto">
+
+            <!-- Header -->
+            <header class="text-center mb-8">
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">随机密码生成器</h1>
+                <p class="mt-2 text-gray-600">在线快速生成安全、随机的密码</p>
+            </header>
+
+            <!-- Main Generator Card -->
+            <main class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left Column: Options -->
+                    <div class="space-y-6">
+                        <!-- FR001: 生成数量 -->
+                        <div>
+                            <label for="quantity" class="block text-sm font-medium text-gray-700 mb-1">生成数量</label>
+                            <div class="number-input-container w-full">
+                                <input type="number" id="quantity" name="quantity" value="5" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                <div class="number-input-arrows">
+                                    <button type="button" onclick="stepValue('quantity', 1)">▲</button>
+                                    <button type="button" onclick="stepValue('quantity', -1)">▼</button>
+                                </div>
+                            </div>
+                            <p id="quantity-error" class="text-red-500 text-xs mt-1 h-4"></p>
+                        </div>
+
+                        <!-- FR002: 长度 -->
+                        <div>
+                             <label class="block text-sm font-medium text-gray-700 mb-1">密码长度</label>
+                            <div class="flex items-center space-x-2">
+                                <div class="number-input-container w-full">
+                                    <input type="number" id="length-from" name="length-from" value="16" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                      <div class="number-input-arrows">
+                                        <button type="button" onclick="stepValue('length-from', 1)">▲</button>
+                                        <button type="button" onclick="stepValue('length-from', -1)">▼</button>
+                                    </div>
+                                </div>
+                                <span class="text-gray-500">~</span>
+                                <div class="number-input-container w-full">
+                                    <input type="number" id="length-to" name="length-to" value="20" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                      <div class="number-input-arrows">
+                                        <button type="button" onclick="stepValue('length-to', 1)">▲</button>
+                                        <button type="button" onclick="stepValue('length-to', -1)">▼</button>
+                                    </div>
+                                </div>
+                            </div>
+                             <p id="length-error" class="text-red-500 text-xs mt-1 h-4"></p>
+                        </div>
+
+                        <!-- FR003: 使用字符集 -->
+                        <div>
+                            <label for="charset-input" class="block text-sm font-medium text-gray-700 mb-1">使用字符集</label>
+                            <textarea id="charset-input" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs"></textarea>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-2 mt-3">
+                                <div class="flex items-center">
+                                    <input id="include-numbers" type="checkbox" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="include-numbers" class="ml-2 block text-sm text-gray-900">数字 (0-9)</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="include-lowercase" type="checkbox" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="include-lowercase" class="ml-2 block text-sm text-gray-900">小写字母 (a-z)</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="include-uppercase" type="checkbox" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="include-uppercase" class="ml-2 block text-sm text-gray-900">大写字母 (A-Z)</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="include-symbols" type="checkbox" checked class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                                    <label for="include-symbols" class="ml-2 block text-sm text-gray-900">常用符号</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FR004: 生成 / FR005: 复制 -->
+                        <div class="flex flex-col space-y-3">
+                           <button id="generate-btn" class="w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out">
+                               生成密码
+                           </button>
+                           <button id="copy-all-btn" class="w-full bg-gray-200 text-gray-800 font-bold py-3 px-4 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition duration-150 ease-in-out">
+                               复制全部
+                           </button>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Results -->
+                    <div class="bg-gray-50 rounded-lg p-4 h-full flex flex-col">
+                        <h3 class="text-lg font-medium text-gray-900 mb-3">生成结果</h3>
+                        <div id="result-output" class="flex-grow bg-white border border-gray-200 rounded-md p-2 overflow-y-auto">
+                            <!-- Generated passwords will be inserted here -->
+                            <div class="text-center text-gray-500 p-8">请点击 "生成密码"</div>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+
+            <!-- FR006: 说明 -->
+            <section class="mt-8 text-left max-w-2xl mx-auto">
+                <h2 class="text-xl font-semibold text-gray-800">密码生成器介绍</h2>
+                <div class="mt-2 text-sm text-gray-600 space-y-2">
+                    <p>在线密码生成器是一款随机数或密码生成工具，密码生成的长度和字符组合能增强密码安全性，增加破解的难度。</p>
+                    <p>您可以选择密码长度，是否包含标点符号，是否包含大、小写字母，是否包含数字等，并一次性生成多个密码。</p>
+                    <p><strong>请放心使用：</strong>此功能完全通过JavaScript在您的浏览器本地完成，您的任何输入和生成结果都不会被记录或提交到服务器端。</p>
+                </div>
+            </section>
+        </div>
+        <div id="copy-feedback" class="copy-feedback">已复制到剪贴板</div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // --- DOM Element References ---
+            const quantityInput = document.getElementById('quantity');
+            const lengthFromInput = document.getElementById('length-from');
+            const lengthToInput = document.getElementById('length-to');
+            const charsetInput = document.getElementById('charset-input');
+            const resultOutput = document.getElementById('result-output');
+            const generateBtn = document.getElementById('generate-btn');
+            const copyAllBtn = document.getElementById('copy-all-btn');
+
+            const quantityError = document.getElementById('quantity-error');
+            const lengthError = document.getElementById('length-error');
+
+            const includeNumbers = document.getElementById('include-numbers');
+            const includeLowercase = document.getElementById('include-lowercase');
+            const includeUppercase = document.getElementById('include-uppercase');
+            const includeSymbols = document.getElementById('include-symbols');
+            
+            const feedback = document.getElementById('copy-feedback');
+
+            // --- Character Sets Definition ---
+            const CHARSETS = {
+                NUMBERS: '0123456789',
+                LOWERCASE: 'abcdefghijklmnopqrstuvwxyz',
+                UPPERCASE: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                SYMBOLS: '~!@#$%^&*()_+'
+            };
+
+            // --- Core Functions ---
+
+            /**
+             * Updates the character set input field based on checkbox selections.
+             * This function is called on init and whenever a checkbox changes.
+             */
+            function updateCharsetInput() {
+                let charset = '';
+                if (includeNumbers.checked) charset += CHARSETS.NUMBERS;
+                if (includeLowercase.checked) charset += CHARSETS.LOWERCASE;
+                if (includeUppercase.checked) charset += CHARSETS.UPPERCASE;
+                if (includeSymbols.checked) charset += CHARSETS.SYMBOLS;
+                charsetInput.value = charset;
+            }
+
+            /**
+             * Validates all input fields and displays error messages.
+             * @returns {boolean} - True if all inputs are valid, otherwise false.
+             */
+            function validateInputs() {
+                let isValid = true;
+                // Clear previous errors
+                quantityError.textContent = '';
+                lengthError.textContent = '';
+
+                // FR001: Validate quantity
+                const quantity = parseInt(quantityInput.value, 10);
+                if (isNaN(quantity) || quantity < 1 || quantity > 100) {
+                    quantityError.textContent = '数量必须是 1 到 100 之间的整数。';
+                    isValid = false;
+                }
+
+                // FR002: Validate length
+                const lengthFrom = parseInt(lengthFromInput.value, 10);
+                const lengthTo = parseInt(lengthToInput.value, 10);
+                if (isNaN(lengthFrom) || lengthFrom < 1 || lengthFrom > 255 ||
+                    isNaN(lengthTo) || lengthTo < 1 || lengthTo > 255) {
+                    lengthError.textContent = '长度必须是 1 到 255 之间的整数。';
+                    isValid = false;
+                } else if (lengthFrom > lengthTo) {
+                    lengthError.textContent = '起始长度不能大于结束长度。';
+                    isValid = false;
+                }
+                
+                // Validate charset
+                if (charsetInput.value.trim() === '') {
+                    // This is an implicit validation. If no characters are selected, we can't generate.
+                    // We can choose to show an error or just generate empty strings.
+                    // For better UX, we prevent generation.
+                    isValid = false;
+                }
+
+                return isValid;
+            }
+
+            /**
+             * Generates a single random password.
+             * @param {number} minLen - The minimum length of the password.
+             * @param {number} maxLen - The maximum length of the password.
+             * @param {string} charset - The character set to use for generation.
+             * @returns {string} - The generated password.
+             */
+            function generatePassword(minLen, maxLen, charset) {
+                const length = Math.floor(Math.random() * (maxLen - minLen + 1)) + minLen;
+                let password = '';
+                for (let i = 0; i < length; i++) {
+                    const randomIndex = Math.floor(Math.random() * charset.length);
+                    password += charset[randomIndex];
+                }
+                return password;
+            }
+
+            /**
+             * Main handler for the "Generate" button click.
+             */
+            function handleGenerate() {
+                if (!validateInputs()) {
+                    resultOutput.innerHTML = '<div class="text-center text-gray-500 p-8">输入参数无效，请检查。</div>';
+                    return;
+                }
+
+                const quantity = parseInt(quantityInput.value, 10);
+                const lengthFrom = parseInt(lengthFromInput.value, 10);
+                const lengthTo = parseInt(lengthToInput.value, 10);
+                const charset = charsetInput.value;
+
+                resultOutput.innerHTML = ''; // Clear previous results
+
+                for (let i = 0; i < quantity; i++) {
+                    const password = generatePassword(lengthFrom, lengthTo, charset);
+                    createResultItem(password);
+                }
+            }
+            
+            /**
+             * Creates and appends a password result item to the output area.
+             * @param {string} passwordText - The password string to display.
+             */
+            function createResultItem(passwordText) {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+
+                const textSpan = document.createElement('span');
+                textSpan.textContent = passwordText;
+                item.appendChild(textSpan);
+
+                const copyBtn = document.createElement('button');
+                copyBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+                        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+                    </svg>`;
+                copyBtn.className = 'text-gray-400 hover:text-blue-600 transition-colors';
+                copyBtn.title = '复制此密码';
+                copyBtn.onclick = () => copyToClipboard(passwordText, '已复制单个密码');
+                
+                item.appendChild(copyBtn);
+
+                resultOutput.appendChild(item);
+            }
+
+            /**
+             * Copies a given text to the clipboard and shows feedback.
+             * @param {string} text - The text to copy.
+             * @param {string} message - The feedback message to show.
+             */
+            function copyToClipboard(text, message = '已复制到剪贴板') {
+                // The modern way using navigator.clipboard might be blocked in some iframe contexts.
+                // We use the older execCommand as a robust fallback.
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed'; // Avoid scrolling to bottom
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showCopyFeedback(message);
+                } catch (err) {
+                    showCopyFeedback('复制失败!', true);
+                }
+                document.body.removeChild(textArea);
+            }
+            
+            /**
+             * Handles copying all generated passwords.
+             */
+            function handleCopyAll() {
+                 const passwordElements = resultOutput.querySelectorAll('.result-item > span');
+                 if (passwordElements.length === 0) {
+                     showCopyFeedback('没有可复制的内容', true);
+                     return;
+                 }
+                 const allPasswords = Array.from(passwordElements).map(span => span.textContent).join('\n');
+                 copyToClipboard(allPasswords, '已复制全部 ' + passwordElements.length + ' 个密码');
+            }
+
+
+            /**
+             * Shows a feedback message (e.g., "Copied!").
+             * @param {string} message - The message to display.
+             * @param {boolean} isError - If true, styles as an error.
+             */
+            let feedbackTimeout;
+            function showCopyFeedback(message, isError = false) {
+                feedback.textContent = message;
+                feedback.style.backgroundColor = isError ? '#e53e3e' : '#2d3748';
+                
+                clearTimeout(feedbackTimeout);
+                feedback.classList.add('show');
+                
+                feedbackTimeout = setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 2000);
+            }
+
+            // --- Event Listeners ---
+            generateBtn.addEventListener('click', handleGenerate);
+            copyAllBtn.addEventListener('click', handleCopyAll);
+
+            [includeNumbers, includeLowercase, includeUppercase, includeSymbols].forEach(checkbox => {
+                checkbox.addEventListener('change', updateCharsetInput);
+            });
+
+            // --- Initialization ---
+            updateCharsetInput(); // Set initial charset on load
+            copyAllBtn.id = "copy-all-btn"; // Changed from FR005 based on feedback
+        });
+
+        // Helper function for number input arrows
+        function stepValue(inputId, step) {
+            const input = document.getElementById(inputId);
+            if (input) {
+                let currentValue = parseInt(input.value, 10);
+                if (isNaN(currentValue)) currentValue = 0;
+                input.value = currentValue + step;
+                // Trigger change event for validation if needed
+                input.dispatchEvent(new Event('change'));
+            }
+        }
+    </script>
+</body>
+</html>
