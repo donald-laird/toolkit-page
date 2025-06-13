@@ -71,6 +71,11 @@
             border: 1px solid #e5e7eb;
             margin-bottom: 0.5rem;
             font-family: 'Courier New', Courier, monospace;
+            /* --- BUG FIX --- */
+            /* Use max-content to force the item to expand with its content */
+            width: max-content;
+            /* Ensure it fills the container width for shorter passwords */
+            min-width: 100%;
         }
         .copy-feedback {
             position: fixed;
@@ -96,16 +101,16 @@
 <body class="bg-gray-50 text-gray-800">
 
     <div class="min-h-screen flex flex-col items-center justify-center p-4">
-        <div class="w-full max-w-2xl mx-auto">
+        <div class="w-full max-w-4xl mx-auto px-4 py-8 md:py-16">
 
             <!-- Header -->
-            <header class="text-center mb-8">
-                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">随机密码生成器</h1>
-                <p class="mt-2 text-gray-600">在线快速生成安全、随机的密码</p>
+            <header class="text-center mb-10">
+                <h1 class="text-4xl md:text-5xl font-bold text-gray-900">随机密码生成器</h1>
+                <p class="mt-3 text-lg text-gray-600">在线快速生成安全、随机的密码</p>
             </header>
 
             <!-- Main Generator Card -->
-            <main class="bg-white p-6 sm:p-8 rounded-2xl shadow-lg">
+            <main class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Left Column: Options -->
                     <div class="space-y-6">
@@ -184,7 +189,8 @@
                     <!-- Right Column: Results -->
                     <div class="bg-gray-50 rounded-lg p-4 h-full flex flex-col">
                         <h3 class="text-lg font-medium text-gray-900 mb-3">生成结果</h3>
-                        <div id="result-output" class="flex-grow bg-white border border-gray-200 rounded-md p-2 overflow-y-auto">
+                        <!-- --- BUG FIX --- Added overflow-x-auto to handle horizontal scrolling within this container -->
+                        <div id="result-output" class="flex-grow bg-white border border-gray-200 rounded-md p-2 overflow-y-auto overflow-x-auto">
                             <!-- Generated passwords will be inserted here -->
                             <div class="text-center text-gray-500 p-8">请点击 "生成密码"</div>
                         </div>
@@ -352,7 +358,7 @@
                         <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
                         <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
                     </svg>`;
-                copyBtn.className = 'text-gray-400 hover:text-blue-600 transition-colors';
+                copyBtn.className = 'text-gray-400 hover:text-blue-600 transition-colors ml-4 flex-shrink-0';
                 copyBtn.title = '复制此密码';
                 copyBtn.onclick = () => copyToClipboard(passwordText, '已复制单个密码');
                 
