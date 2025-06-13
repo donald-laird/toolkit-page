@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UUID 在线生成器</title>
+    <!-- 引入 Tailwind CSS 以实现现代化和响应式设计 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Inter 字体以匹配 Google 风格 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 自定义样式以增强用户体验 */
+        body {
+            font-family: 'Inter', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* 按钮过渡效果 */
+        .btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+        /* Toast 通知样式 */
+        #toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            transition: all 0.3s ease-in-out;
+            z-index: 50;
+            opacity: 0;
+            visibility: hidden;
+        }
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto px-4 py-8 md:py-16 max-w-4xl">
+
+        <!-- 标题区域 -->
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">UUID 在线生成器</h1>
+            <p class="mt-3 text-lg text-gray-600">简洁、高效、安全的客户端 UUID 生成工具</p>
+        </header>
+
+        <!-- 主要功能区域 -->
+        <main class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
+            
+            <!-- 配置选项 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- FR001: 生成数量 -->
+                <div>
+                    <label for="quantity" class="block text-sm font-medium text-gray-700 mb-2">生成数量</label>
+                    <input type="number" id="quantity" name="quantity" value="5" min="1" max="100" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    <p id="quantity-error" class="text-red-500 text-sm mt-2 h-5"></p>
+                </div>
+                
+                <!-- FR002: 是否大写 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">字母大小写</label>
+                    <div class="flex items-center space-x-4 h-10">
+                        <div class="flex items-center">
+                            <input id="case-lower" name="case" type="radio" value="lower" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500" checked>
+                            <label for="case-lower" class="ml-2 block text-sm text-gray-900">小写</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="case-upper" name="case" type="radio" value="upper" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                            <label for="case-upper" class="ml-2 block text-sm text-gray-900">大写</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input id="case-random" name="case" type="radio" value="random" class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+                            <label for="case-random" class="ml-2 block text-sm text-gray-900">随机</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="flex flex-wrap gap-4 border-t border-gray-200 pt-6">
+                <!-- FR003: 生成 UUID -->
+                <button id="generate-btn" class="btn bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg shadow-sm w-full sm:w-auto">
+                    生成 UUID
+                </button>
+                <!-- FR005: 复制全部 & 导出操作 -->
+                <button id="copy-all-btn" class="btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-5 rounded-lg w-full sm:w-auto hidden">
+                    复制全部
+                </button>
+                <button id="export-btn" class="btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-5 rounded-lg w-full sm:w-auto hidden">
+                    导出 TXT
+                </button>
+            </div>
+
+            <!-- 结果输出区域 -->
+            <div id="result-container" class="mt-8">
+                <!-- 生成的 UUID 将会动态插入到这里 -->
+            </div>
+
+        </main>
+
+        <!-- FR006: 说明区域 -->
+        <footer class="mt-12 text-gray-600 text-sm">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-200">
+                <h3 class="font-semibold text-lg text-gray-900 mb-3">在线UUID生成器介绍</h3>
+                <div class="space-y-3">
+                    <p>UUID 是通用唯一识别码 (Universally Unique Identifier) 的缩写，指在一台机器上生成的唯一数字，由32位16进制数字组成，形式为 8-4-4-4-12。由于 UUID 的唯一性特征，通常用于分布式系统中对象的标识。</p>
+                    <p>UUID 按照标准方法生成时，在实际应用中具有唯一性，且不依赖中央机构的注册和分配。UUID 重复的概率接近零，可以忽略不计。</p>
+                    <p>本工具可批量生成指定数量（不超过100个）的 UUID。</p>
+                    <p class="font-semibold text-gray-800 mt-4">安全提示：所有 UUID 的生成逻辑完全在您的浏览器客户端完成，我们不记录、不存储、不发送任何您生成的数据，请放心使用。</p>
+                </div>
+            </div>
+        </footer>
+
+        <!-- 新增: GitHub 源码链接 -->
+        <div class="text-center mt-10">
+            <a href="https://github.com/donald-laird/toolkit-page" target="_blank" rel="noopener noreferrer" title="在 GitHub 上查看源码" class="inline-block text-gray-400 hover:text-gray-600 transition duration-300">
+                <svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.168 6.839 9.492.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.031-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.378.203 2.398.1 2.651.64.7 1.03 1.595 1.03 2.688 0 3.848-2.338 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.001 10.001 0 0022 12c0-5.523-4.477-10-10-10z" clip-rule="evenodd"></path>
+                </svg>
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Toast 通知元素 -->
+    <div id="toast" class="bg-gray-900 text-white py-2 px-5 rounded-full text-sm shadow-lg">
+        <span id="toast-message"></span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 获取所有需要的 DOM 元素
+            const quantityInput = document.getElementById('quantity');
+            const quantityError = document.getElementById('quantity-error');
+            const generateBtn = document.getElementById('generate-btn');
+            const copyAllBtn = document.getElementById('copy-all-btn');
+            const exportBtn = document.getElementById('export-btn');
+            const resultContainer = document.getElementById('result-container');
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+
+            let toastTimeout;
+
+            /**
+             * 显示 Toast 通知
+             * @param {string} message - 要显示的消息
+             */
+            const showToast = (message) => {
+                clearTimeout(toastTimeout);
+                toastMessage.textContent = message;
+                toast.classList.add('show');
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 2000); // 2秒后自动隐藏
+            };
+
+            /**
+             * 复制文本到剪贴板
+             * @param {string} text - 要复制的文本
+             */
+            const copyToClipboard = (text) => {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    // 使用 document.execCommand 以获得更好的 iframe 兼容性
+                    document.execCommand('copy');
+                    showToast('已复制到剪贴板');
+                } catch (err) {
+                    console.error('复制失败:', err);
+                    showToast('复制失败，请检查浏览器权限');
+                }
+                document.body.removeChild(textarea);
+            };
+
+            /**
+             * 验证输入是否有效
+             * @returns {boolean} - 是否有效
+             */
+            const validateInputs = () => {
+                quantityError.textContent = ''; // 重置错误信息
+                const quantity = parseInt(quantityInput.value, 10);
+                
+                // FR001 & FR007: 验证数量
+                if (isNaN(quantity) || quantity < 1 || quantity > 100) {
+                    quantityError.textContent = '请输入一个 1 到 100 之间的整数。';
+                    resultContainer.innerHTML = ''; // 清空结果
+                    copyAllBtn.classList.add('hidden');
+                    exportBtn.classList.add('hidden');
+                    return false;
+                }
+                return true;
+            };
+
+            /**
+             * FR003: 生成并显示 UUID
+             */
+            const generateAndDisplayUUIDs = () => {
+                if (!validateInputs()) {
+                    return;
+                }
+
+                resultContainer.innerHTML = ''; // 清空旧结果
+                const quantity = parseInt(quantityInput.value, 10);
+                const caseOption = document.querySelector('input[name="case"]:checked').value;
+
+                const fragment = document.createDocumentFragment();
+
+                for (let i = 0; i < quantity; i++) {
+                    // 使用 crypto.randomUUID() 生成符合 V4 标准的 UUID
+                    let uuid = crypto.randomUUID();
+
+                    // FR002: 处理大小写
+                    if (caseOption === 'upper') {
+                        uuid = uuid.toUpperCase();
+                    } else if (caseOption === 'random') {
+                        uuid = Math.random() < 0.5 ? uuid.toLowerCase() : uuid.toUpperCase();
+                    }
+                    // 'lower' 是默认值，无需处理
+
+                    // 创建结果行
+                    const resultRow = document.createElement('div');
+                    resultRow.className = 'flex items-center justify-between bg-gray-100 p-3 rounded-lg mb-3';
+
+                    const uuidText = document.createElement('code');
+                    uuidText.className = 'text-gray-800 text-sm md:text-base break-all';
+                    uuidText.textContent = uuid;
+                    
+                    // FR004: 单个复制按钮
+                    const copyBtn = document.createElement('button');
+                    copyBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500 hover:text-blue-600 transition">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>`;
+                    copyBtn.className = 'ml-4 flex-shrink-0';
+                    copyBtn.setAttribute('aria-label', '复制此 UUID');
+                    copyBtn.onclick = () => copyToClipboard(uuid);
+
+                    resultRow.appendChild(uuidText);
+                    resultRow.appendChild(copyBtn);
+                    fragment.appendChild(resultRow);
+                }
+
+                resultContainer.appendChild(fragment);
+                // 显示“复制全部”和“导出”按钮
+                copyAllBtn.classList.remove('hidden');
+                exportBtn.classList.remove('hidden');
+            };
+            
+            // 绑定事件监听器
+            generateBtn.addEventListener('click', generateAndDisplayUUIDs);
+            
+            // FR004: 复制全部
+            copyAllBtn.addEventListener('click', () => {
+                const allUUIDs = Array.from(resultContainer.querySelectorAll('code'))
+                                    .map(code => code.textContent)
+                                    .join('\n');
+                if(allUUIDs) {
+                    copyToClipboard(allUUIDs);
+                }
+            });
+
+            // FR005: 导出操作
+            exportBtn.addEventListener('click', () => {
+                const allUUIDs = Array.from(resultContainer.querySelectorAll('code'))
+                                    .map(code => code.textContent)
+                                    .join('\n');
+                if(!allUUIDs) return;
+
+                const blob = new Blob([allUUIDs], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'uuids.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showToast('已导出为 uuids.txt');
+            });
+
+        });
+    </script>
+</body>
+</html>
