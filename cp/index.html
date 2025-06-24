@@ -115,7 +115,7 @@
                 <!-- Preview and color values -->
                 <div>
                     <h2 class="text-lg font-semibold mb-4 text-gray-600">颜色预览与代码</h2>
-                    <div class="flex items-center space-x-4">
+                    <div class="flex flex-col md:flex-row items-center md:space-x-4 space-y-4 md:space-y-0">
                         <div class="flex space-x-4 flex-shrink-0">
                              <div class="text-center">
                                 <div id="preview" class="w-24 h-24 rounded-lg border border-gray-200 shadow-inner" style="background-color: #f3f4f6;"></div>
@@ -126,7 +126,7 @@
                                 <p class="text-xs text-gray-500 mt-1">选中颜色</p>
                             </div>
                         </div>
-                        <div class="flex-grow space-y-4">
+                        <div class="w-full md:w-auto flex-grow space-y-4">
                              <div class="flex items-center">
                                 <label for="hex" class="w-12 text-sm font-medium text-gray-700">HEX</label>
                                 <div class="relative flex-grow">
@@ -152,7 +152,7 @@
                 <!-- Main Color Palette -->
                 <div>
                     <h2 class="text-lg font-semibold mb-3 text-gray-600">图片主色</h2>
-                    <div id="main-colors" class="grid grid-cols-5 md:grid-cols-10 gap-4">
+                    <div id="main-colors" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                          <p class="text-sm text-gray-400 col-span-full">请先添加图片</p>
                     </div>
                 </div>
@@ -160,7 +160,7 @@
                 <!-- Theme Color Palette -->
                 <div>
                     <h2 class="text-lg font-semibold mb-3 text-gray-600">图片主题色</h2>
-                    <div id="theme-colors" class="grid grid-cols-5 md:grid-cols-10 gap-4">
+                    <div id="theme-colors" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                          <p class="text-sm text-gray-400 col-span-full">请先添加图片</p>
                     </div>
                 </div>
